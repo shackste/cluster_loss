@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 from geomloss import SamplesLoss
 
-from metrics import compute_cluster_filling_mse, approx_cluster_filling, cluster_statistics, calculate_fid
+from cluster_los.metrics import compute_cluster_filling_mse, approx_cluster_filling, cluster_statistics, calculate_fid
 
 wasserstein_loss = SamplesLoss("sinkhorn", p=2, blur=0.05, scaling=0.8, backend="tensorized")
 
