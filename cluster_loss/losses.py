@@ -7,7 +7,7 @@ from geomloss import SamplesLoss
 
 from cluster_loss.metrics import compute_cluster_filling_mse, approx_cluster_filling, cluster_statistics, calculate_fid
 
-wasserstein_loss = SamplesLoss("sinkhorn", p=2, blur=0.05, scaling=0.8, backend="tensorized")
+wasserstein_distance = SamplesLoss("sinkhorn", p=2, blur=0.05, scaling=0.8, backend="tensorized")
 
 
 MSE = nn.MSELoss()
@@ -20,7 +20,7 @@ MSE = nn.MSELoss()
 # pairwise_distance = partial(pairwise_distance, distance="cosine")
 
 class LossWassersteinFull(nn.Module):
-    """Computes the Wasserstein distance between the target and the generated data.
+    """ Computes the Wasserstein distance between the target and the generated data.
 
     Args:
         target (torch.Tensor): The target data.
@@ -39,7 +39,8 @@ class LossWassersteinFull(nn.Module):
         Returns:
             torch.Tensor: The computed loss tensor.
         """
-        return wasserstein_loss(x, self.target)
+        # TODO: ensure x and target are of same size
+        return wasserstein_distance(x, self.target)
 
 
 class LossKMeans(nn.Module):
@@ -82,7 +83,7 @@ class LossMeanCov(nn.Module):
         loss_fil = compute_cluster_filling_mse(x, self.cluster_centers, self.filling_target)
         prediction = kmeans_predict(x, self.cluster_centers)
         means, covs = cluster_statistics(x, prediction, self.cluster_centers)
-        loss_stat = MSE(means, self.means_target) + MSE(covs, self.covs_target)  # Instead of MSE, use FID !!!
+        loss_stat = MSE(means, self.means_target) + MSE(covs, self.covs_target)  # TODO: Instead of MSE, use FID
         return loss_fil + loss_stat
 
 
@@ -107,7 +108,7 @@ class LossWasserstein(nn.Module):
         # for each cluster, compute wasserstein distance
         loss_med = torch.tensor(0.)
         for cluster in torch.unique(prediction):
-            loss_med += wasserstein_loss(x[prediction == cluster], self.target[self.prediction == cluster])
+            loss_med += wasserstein_distance(x[prediction == cluster], self.target[self.prediction == cluster])
         return loss_fil + loss_med
 
 

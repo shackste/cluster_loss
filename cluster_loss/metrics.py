@@ -1,5 +1,8 @@
 import torch
 from kmeans_pytorch import pairwise_distance
+from geomloss import SamplesLoss
+
+wasserstein_distance = SamplesLoss("sinkhorn", p=2, blur=0.05, scaling=0.8, backend="tensorized")
 
 def calculate_fid(real_features, generated_features):
     # Calculate the mean and covariance of the real features
@@ -62,7 +65,7 @@ def compute_cluster_filling_mse(input: torch.Tensor, cluster_centers: torch.Tens
         torch.Tensor: The computed loss tensor.
     """
     distances = pairwise_distance(input, cluster_centers)
-    #   distances = distances / self.mean_distances.repeat(input.shape[0], 1)  ### ?!?!?
+    #   distances = distances / self.mean_distances.repeat(input.shape[0], 1)  # Todo: normalize by mean distance?
     filling = approx_cluster_filling(distances)
     if print_filling:
         print("filling")
