@@ -52,16 +52,17 @@ class LossKMeans(nn.Module):
 
     def __init__(self, target: torch.Tensor, n_clusters: int):
         super(LossKMeans, self).__init__()
-        prediction, cluster_centers = kmeans(X=target, num_clusters=n_clusters, device=target.device)
-        self.cluster_centers = cluster_centers
-        prediction = kmeans_predict(target, self.cluster_centers)
-        distances = pairwise_distance(target, self.cluster_centers)
-        means, covs = cluster_statistics(target, prediction.to(target.device), self.cluster_centers.to(target.device))
+        with torch.no_grad():
+            prediction, cluster_centers = kmeans(X=target, num_clusters=n_clusters, device=target.device)
+            prediction = kmeans_predict(target, cluster_centers)
+            distances = pairwise_distance(target, cluster_centers)
+            means, covs = cluster_statistics(target, prediction.to(target.device), cluster_centers.to(target.device))
+        self.cluster_centers = cluster_centers.detach()
         self.filling_target = approx_cluster_filling(distances).detach()
-        self.means_target = means
-        self.covs_target = covs
-        self.prediction = prediction
-        self.target = target
+        self.means_target = means.detach()
+        self.covs_target = covs.detach()
+        self.prediction = prediction.detach()
+        self.target = target.detach()
 
 
 class LossMeanCov(nn.Module):
