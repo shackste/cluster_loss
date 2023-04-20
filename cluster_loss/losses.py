@@ -56,7 +56,7 @@ class LossKMeans(nn.Module):
         self.cluster_centers = cluster_centers
         prediction = kmeans_predict(target, self.cluster_centers)
         distances = pairwise_distance(target, self.cluster_centers)
-        means, covs = cluster_statistics(target, prediction, self.cluster_centers)
+        means, covs = cluster_statistics(target, prediction.to(target.device), self.cluster_centers.to(target.device))
         self.filling_target = approx_cluster_filling(distances).detach()
         self.means_target = means
         self.covs_target = covs
