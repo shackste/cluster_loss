@@ -7,16 +7,24 @@ from geomloss import SamplesLoss
 
 from cluster_loss.metrics import compute_cluster_filling_mse, approx_cluster_filling, cluster_statistics, calculate_fid
 
+# Set device
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 wasserstein_distance = SamplesLoss("sinkhorn", p=2, blur=0.05, scaling=0.8, backend="tensorized")
 
 MSE = nn.MSELoss()
-
 
 # TODO: USE COSINE DISTANCE IN HIGH DIMENSIONS
 
 # kmeans = partial(kmeans, distance="cosine")
 # kmeans_predict = partial(kmeans_predict, distance="cosine")
-# pairwise_distance = partial(pairwise_distance, distance="cosine")
+# pairwise_distance = partial(pairwise_cosine, device=device)
+
+kmeans = partial(kmeans, device=device, tqdm_flag=False)
+kmeans_predict = partial(kmeans_predict, device=device, tqdm_flag=False)
+# tqdm_flag only in pairwise_distance, not in pairwise_cosine
+pairwise_distance = partial(pairwise_distance, device=device, tqdm_flag=False)
+
 
 class LossWassersteinFull(nn.Module):
     """ Computes the Wasserstein distance between the target and the generated data.
