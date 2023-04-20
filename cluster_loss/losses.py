@@ -21,9 +21,9 @@ MSE = nn.MSELoss()
 # pairwise_distance = partial(pairwise_cosine, device=device)
 
 kmeans = partial(kmeans, device=device)
-kmeans_predict = partial(kmeans_predict, device=device, tqdm_flag=False)
+kmeans_predict = partial(kmeans_predict, device=device)
 # tqdm_flag only in pairwise_distance, not in pairwise_cosine
-pairwise_distance = partial(pairwise_distance, device=device, tqdm_flag=False)
+pairwise_distance = partial(pairwise_distance, device=device)
 
 
 class LossWassersteinFull(nn.Module):
