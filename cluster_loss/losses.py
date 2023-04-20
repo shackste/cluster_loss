@@ -81,7 +81,7 @@ class LossMeanCov(nn.Module):
         """
         loss_fil = compute_cluster_filling_mse(x, self.cluster_centers, self.filling_target)
         prediction = kmeans_predict(x, self.cluster_centers)
-        means, covs = cluster_statistics(x, prediction.to(target.device), self.cluster_centers.to(target.device))
+        means, covs = cluster_statistics(x, prediction.to(x.device), self.cluster_centers.to(x.device))
         loss_stat = MSE(means, self.means_target) + MSE(covs, self.covs_target)  # TODO: Instead of MSE, use FID
         return loss_fil + loss_stat
 
