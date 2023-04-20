@@ -20,7 +20,7 @@ MSE = nn.MSELoss()
 # kmeans_predict = partial(kmeans_predict, distance="cosine")
 # pairwise_distance = partial(pairwise_cosine, device=device)
 
-kmeans = partial(kmeans, device=device, tqdm_flag=False)
+kmeans = partial(kmeans, device=device)
 kmeans_predict = partial(kmeans_predict, device=device, tqdm_flag=False)
 # tqdm_flag only in pairwise_distance, not in pairwise_cosine
 pairwise_distance = partial(pairwise_distance, device=device, tqdm_flag=False)
