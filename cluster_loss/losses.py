@@ -9,11 +9,10 @@ from cluster_loss.metrics import compute_cluster_filling_mse, approx_cluster_fil
 
 wasserstein_distance = SamplesLoss("sinkhorn", p=2, blur=0.05, scaling=0.8, backend="tensorized")
 
-
 MSE = nn.MSELoss()
 
 
-#  USE COSINE DISTANCE IN HIGH DIMENSIONS
+# TODO: USE COSINE DISTANCE IN HIGH DIMENSIONS
 
 # kmeans = partial(kmeans, distance="cosine")
 # kmeans_predict = partial(kmeans_predict, distance="cosine")
@@ -53,7 +52,7 @@ class LossKMeans(nn.Module):
 
     def __init__(self, target: torch.Tensor, n_clusters: int):
         super(LossKMeans, self).__init__()
-        prediction, cluster_centers = kmeans(X=target, num_clusters=n_clusters)
+        prediction, cluster_centers = kmeans(X=target, num_clusters=n_clusters, device=target.device)
         self.cluster_centers = cluster_centers
         prediction = kmeans_predict(target, self.cluster_centers)
         distances = pairwise_distance(target, self.cluster_centers)
