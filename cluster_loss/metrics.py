@@ -109,7 +109,7 @@ def distribution_statistics(data):
     Tuple[torch.Tensor, torch.Tensor]: A tuple containing the computed mean and covariance tensors.
     """
     if data.shape[0] == 0:
-        return torch.zeros(data.shape[1]), torch.zeros((data.shape[1], data.shape[1]))
+        return torch.zeros(data.shape[1]).to(data.device), torch.zeros((data.shape[1], data.shape[1])).to(data.device)
     mean = torch.mean(data, dim=0)
     cov = torch.cov(data.T)
     return mean, cov
