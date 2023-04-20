@@ -1,6 +1,14 @@
+from functools import partial
+
 import torch
 from kmeans_pytorch import pairwise_distance
 from geomloss import SamplesLoss
+
+
+# TODO: USE COSINE DISTANCE IN HIGH DIMENSIONS
+# pairwise_distance = partial(pairwise_cosine)
+pairwise_distance = partial(pairwise_distance, device=device)
+
 
 wasserstein_distance = SamplesLoss("sinkhorn", p=2, blur=0.05, scaling=0.8, backend="tensorized")
 

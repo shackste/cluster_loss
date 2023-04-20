@@ -18,11 +18,10 @@ MSE = nn.MSELoss()
 
 # kmeans = partial(kmeans, distance="cosine")
 # kmeans_predict = partial(kmeans_predict, distance="cosine")
-# pairwise_distance = partial(pairwise_cosine, device=device)
+# pairwise_distance = partial(pairwise_cosine)
 
 kmeans = partial(kmeans, device=device)
 kmeans_predict = partial(kmeans_predict, device=device)
-# tqdm_flag only in pairwise_distance, not in pairwise_cosine
 pairwise_distance = partial(pairwise_distance, device=device)
 
 
@@ -88,10 +87,10 @@ class LossMeanCov(nn.Module):
         Returns:
             torch.Tensor: The computed loss tensor.
         """
-        loss_fil = compute_cluster_filling_mse(x, self.cluster_centers, self.filling_target)
-        prediction = kmeans_predict(x, self.cluster_centers)
+        loss_fil = compute_cluster_filling_mse(x, self.cluster_centers.to(x.device), self.filling_target.to(x.device))
+        prediction = kmeans_predict(x, self.cluster_centers.to(x.device))
         means, covs = cluster_statistics(x, prediction.to(x.device), self.cluster_centers.to(x.device))
-        loss_stat = MSE(means, self.means_target) + MSE(covs, self.covs_target)  # TODO: Instead of MSE, use FID
+        loss_stat = MSE(means, self.means_target.to(x.device)) + MSE(covs, self.covs_target.to(x.device))  # TODO: Instead of MSE, use FID
         return loss_fil + loss_stat
 
 
