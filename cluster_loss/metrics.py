@@ -4,6 +4,8 @@ import torch
 from kmeans_pytorch import pairwise_distance
 from geomloss import SamplesLoss
 
+# Set device
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # TODO: USE COSINE DISTANCE IN HIGH DIMENSIONS
 # pairwise_distance = partial(pairwise_cosine)
