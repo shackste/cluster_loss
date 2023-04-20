@@ -118,9 +118,11 @@ def distribution_statistics(data):
     Returns:
     Tuple[torch.Tensor, torch.Tensor]: A tuple containing the computed mean and covariance tensors.
     """
-    if data.shape[0] == 0:
+    if data.shape[0] == 0: # empty cluster causes nan in torch.mean and torch.cov
         return torch.zeros(data.shape[1]).to(data.device), torch.zeros((data.shape[1], data.shape[1])).to(data.device)
     mean = torch.mean(data, dim=0)
+    if data.shape[0] == 1: # single data point causes nan in torch.cov
+        return mean, torch.zeros((data.shape[1], data.shape[1])).to(data.device)
     cov = torch.cov(data.T)
     return mean, cov
 
