@@ -115,7 +115,10 @@ class LossWasserstein(nn.Module):
         # for each cluster, compute wasserstein distance
         loss_med = torch.tensor(0.)
         for cluster in torch.unique(prediction):
-            loss_med += wasserstein_distance(x[prediction == cluster], self.target[self.prediction == cluster])
+            in_cluster = prediction == cluster
+            if not in_cluster:
+                continue
+            loss_med += wasserstein_distance(x[in_cluster], self.target[self.prediction == cluster])
         return loss_fil + loss_med
 
 
