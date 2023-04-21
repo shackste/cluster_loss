@@ -45,8 +45,17 @@ class LossWassersteinFull(nn.Module):
         Returns:
             torch.Tensor: The computed loss tensor.
         """
-        # TODO: ensure x and target are of same size
-        return wasserstein_distance(x, self.target)
+        # Calculate the sizes of both arrays
+        size_x = len(x)
+        size_target = len(self.target)
+
+        # Find the minimum size and resize both arrays accordingly
+        min_size = min(size_x, size_target)
+        x_resized = x[:min_size]
+        target_resized = self.target[:min_size]
+
+        # Compute the Wasserstein distance with same-sized arrays
+        return wasserstein_distance(x_resized, target_resized)
 
 
 class LossKMeans(nn.Module):
@@ -116,9 +125,19 @@ class LossWasserstein(nn.Module):
         loss_med = torch.tensor(0.)
         for cluster in torch.unique(prediction):
             in_cluster = prediction == cluster
-            if not in_cluster:
+            if not in_cluster.any():
                 continue
-            loss_med += wasserstein_distance(x[in_cluster], self.target[self.prediction == cluster])
+            # Calculate the sizes of both arrays
+            size_x = len(x[in_cluster])
+            size_target = len(self.target[self.prediction == cluster])
+
+            # Find the minimum size and resize both arrays accordingly
+            min_size = min(size_x, size_target)
+            x_resized = x[in_cluster][:min_size]
+            target_resized = self.target[self.prediction == cluster][:min_size]
+
+            # Compute the Wasserstein distance with same-sized arrays
+            loss_med += wasserstein_distance(x_resized, target_resized)
         return loss_fil + loss_med
 
 
