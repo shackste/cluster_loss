@@ -34,7 +34,7 @@ class LossWassersteinFull(nn.Module):
 
     def __init__(self, target: torch.Tensor, *x):
         super(LossWassersteinFull, self).__init__()
-        self.target = target
+        self.target = target.detach()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Computes the loss for the given input tensor.
