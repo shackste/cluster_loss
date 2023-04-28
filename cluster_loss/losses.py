@@ -122,7 +122,7 @@ class LossWasserstein(nn.Module):
         # get cluster association
         prediction = kmeans_predict(x, self.cluster_centers.to(x.device)).detach()
         # for each cluster, compute wasserstein distance
-        loss_med = torch.tensor(0.)
+        loss_med = torch.tensor(0.).to(device)
         for cluster in torch.unique(prediction):
             in_cluster = prediction == cluster
             if not in_cluster.any():
@@ -137,10 +137,8 @@ class LossWasserstein(nn.Module):
             target_resized = self.target[self.prediction == cluster][:min_size]
 
             # Compute the Wasserstein distance with same-sized arrays
-            print(x_resized.device, target_resized.device)
-            loss_ws = wasserstein_distance(x_resized.to(device), target_resized.to(device))
-            print(loss_ws.device, loss_med.device)
-            loss_med += loss_ws
+            loss_med += wasserstein_distance(x_resized.to(device), target_resized.to(device))
+
         return loss_fil + loss_med
 
 
