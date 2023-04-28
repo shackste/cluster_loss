@@ -137,7 +137,8 @@ class LossWasserstein(nn.Module):
             target_resized = self.target[self.prediction == cluster][:min_size]
 
             # Compute the Wasserstein distance with same-sized arrays
-            loss_med += wasserstein_distance(x_resized, target_resized.to(x.device))
+            print(x_resized.device, target_resized.device)
+            loss_med += wasserstein_distance(x_resized.to(x.device), target_resized.to(x.device))
         return loss_fil + loss_med
 
 
