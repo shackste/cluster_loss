@@ -118,9 +118,9 @@ class LossWasserstein(nn.Module):
         Returns:
             torch.Tensor: The computed loss tensor.
         """
-        loss_fil = compute_cluster_filling_mse(x, self.cluster_centers, self.filling_target)
+        loss_fil = compute_cluster_filling_mse(x, self.cluster_centers.to(x.device), self.filling_target.to(x.device))
         # get cluster association
-        prediction = kmeans_predict(x, self.cluster_centers)
+        prediction = kmeans_predict(x, self.cluster_centers.to(x.device)).detach()
         # for each cluster, compute wasserstein distance
         loss_med = torch.tensor(0.)
         for cluster in torch.unique(prediction):
