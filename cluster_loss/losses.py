@@ -139,7 +139,7 @@ class LossWasserstein(nn.Module):
             # Compute the Wasserstein distance with same-sized arrays
             print(x_resized.device, target_resized.device)
             loss_ws = wasserstein_distance(x_resized.to(device), target_resized.to(device))
-            print(loss_ws.decive, loss_med.device)
+            print(loss_ws.device, loss_med.device)
             loss_med += loss_ws
         return loss_fil + loss_med
 
