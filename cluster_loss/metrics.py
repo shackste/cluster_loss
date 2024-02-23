@@ -1,5 +1,6 @@
 from functools import partial
 
+import numpy as np
 import torch
 from kmeans_pytorch import pairwise_distance
 from geomloss import SamplesLoss
@@ -17,7 +18,9 @@ wasserstein_distance = SamplesLoss("sinkhorn", p=2, blur=0.05, scaling=0.8, back
 
 def calculate_fid(real_features, generated_features):
     # Calculate the mean and covariance of the real features
-    real_mean = np.mean(real_features.numpy(), axis=0)
+    real_features = real_features.numpy()
+    generated_features = generated_features.numpy()
+    real_mean = np.mean(real_features, axis=0)
     real_covariance = np.cov(real_features, rowvar=False)
 
     # Calculate the mean and covariance of the generated features
