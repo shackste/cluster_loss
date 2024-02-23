@@ -7,5 +7,5 @@ setup(
     author='Stefan Hackstein',
     author_email='shackst3@gmail.com',
     packages=['cluster_loss'],
-    install_requires=['kmeans_pytorch', 'torch', 'numpy', 'geomloss']
+    install_requires=['kmeans_pytorch', 'torch', 'numpy', 'geomloss', 'pytorch_fid]
 )
