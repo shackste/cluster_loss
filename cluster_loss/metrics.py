@@ -3,6 +3,7 @@ from functools import partial
 import torch
 from kmeans_pytorch import pairwise_distance
 from geomloss import SamplesLoss
+from pytorch_fid.fid_score import calculate_frechet_distance
 
 # Set device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -16,29 +17,14 @@ wasserstein_distance = SamplesLoss("sinkhorn", p=2, blur=0.05, scaling=0.8, back
 
 def calculate_fid(real_features, generated_features):
     # Calculate the mean and covariance of the real features
-    real_mean = torch.mean(real_features, dim=0)
-    real_covariance = torch_cov(real_features, rowvar=False)
+    real_mean = np.mean(real_features.numpy(), axis=0)
+    real_covariance = np.cov(real_features, rowvar=False)
 
     # Calculate the mean and covariance of the generated features
-    generated_mean = torch.mean(generated_features, dim=0)
-    generated_covariance = torch_cov(generated_features, rowvar=False)
+    generated_mean = np.mean(generated_features.numpy(), axis=0)
+    generated_covariance = np.cov(generated_features, rowvar=False)
 
-    # Calculate the squared Euclidean distance between the means of the two sets of features
-    distance_squared = torch.sum((real_mean - generated_mean) ** 2)
-
-    # Calculate the sum of the two covariance matrices
-    covariance_sum = real_covariance + generated_covariance
-
-    # Calculate the square root of the product of the two matrices' determinants
-    covariance_sqrt = torch.sqrt(torch.det(real_covariance) * torch.det(generated_covariance))
-
-    # Calculate the trace of the square root of the sum of the covariance matrices divided by 2
-    trace = torch.trace(torch.sqrt(covariance_sum) / 2.0)
-
-    # Calculate the FID as the squared Euclidean distance between the means plus the trace of the sum of the covariance matrices minus twice the square root of the product of their determinants
-    fid = distance_squared + torch.trace(real_covariance) + torch.trace(generated_covariance) - 2 * trace + covariance_sqrt
-
-    return fid
+    return calculate_frechet_distance(real_mean, real_covariance, generated_mean, generated_covariance)
 
 def torch_cov(x, rowvar=False, bias=False, ddof=None, aweights=None):
     '''Estimate a covariance matrix given data.
