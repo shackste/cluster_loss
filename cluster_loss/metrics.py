@@ -18,13 +18,13 @@ wasserstein_distance = SamplesLoss("sinkhorn", p=2, blur=0.05, scaling=0.8, back
 
 def calculate_fid(real_features, generated_features):
     # Calculate the mean and covariance of the real features
-    real_features = real_features.numpy()
-    generated_features = generated_features.numpy()
+    real_features = real_features.cpu().numpy()
+    generated_features = generated_features.cpu().numpy()
     real_mean = np.mean(real_features, axis=0)
     real_covariance = np.cov(real_features, rowvar=False)
 
     # Calculate the mean and covariance of the generated features
-    generated_mean = np.mean(generated_features.numpy(), axis=0)
+    generated_mean = np.mean(generated_features, axis=0)
     generated_covariance = np.cov(generated_features, rowvar=False)
 
     return calculate_frechet_distance(real_mean, real_covariance, generated_mean, generated_covariance)
