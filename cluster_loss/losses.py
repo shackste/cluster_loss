@@ -87,11 +87,12 @@ class LossMeanCov(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, kappa=1.) -> torch.Tensor:
         """Computes the loss for the given input tensor.
 
         Args:
             x (torch.Tensor): The input tensor to compute the loss on.
+            kappa (float): weight factor for the statistical loss (distribution of distances)
 
         Returns:
             torch.Tensor: The computed loss tensor.
@@ -100,7 +101,7 @@ class LossMeanCov(nn.Module):
         prediction = kmeans_predict(x, self.cluster_centers.to(x.device))
         means, covs = cluster_statistics(x, prediction.to(x.device), self.cluster_centers.to(x.device))
         loss_stat = MSE(means, self.means_target.to(x.device)) + MSE(covs, self.covs_target.to(x.device))  # TODO: Instead of MSE, use FID
-        return loss_fil + loss_stat
+        return loss_fil + kappa*loss_stat
 
 
 class LossWasserstein(nn.Module):
