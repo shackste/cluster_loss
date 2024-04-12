@@ -16,6 +16,21 @@ pairwise_distance = partial(pairwise_distance, device=device)
 
 wasserstein_distance = SamplesLoss("sinkhorn", p=2, blur=0.05, scaling=0.8, backend="tensorized")
 
+def cluster_error(n: torch.Tensor, n_target: torch.Tensor):
+    """
+    Computes the cluster error (Hackstein et al. 2023)
+
+    Args:
+        n (torch.Tensor): number of data points within each cluster
+        n_target (torch.Tensor): target number of ...
+
+    Returns:
+        torch.Tensor: the computed error
+    """
+    diff = 1 - n / n_target
+    return torch.mean(diff*diff)
+
+
 def calculate_fid(real_features, generated_features):
     # Calculate the mean and covariance of the real features
     real_features = real_features.cpu().numpy()
@@ -70,8 +85,7 @@ def compute_cluster_filling_mse(input: torch.Tensor, cluster_centers: torch.Tens
         print("filling")
         print("target", filling_target)
         print("gen'ted", filling)
-    filling = 1 - filling / filling_target
-    loss_fil = torch.mean(filling * filling)
+    loss_fil = cluster_error(filling, filling_target)
     return loss_fil
 
 def approx_cluster_filling(distances):
