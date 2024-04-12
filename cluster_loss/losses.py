@@ -101,7 +101,10 @@ class LossMeanCov(nn.Module):
         prediction = kmeans_predict(x, self.cluster_centers.to(x.device))
         means, covs = cluster_statistics(x, prediction.to(x.device), self.cluster_centers.to(x.device))
         loss_stat = MSE(means, self.means_target.to(x.device)) + MSE(covs, self.covs_target.to(x.device))  # TODO: Instead of MSE, use FID
-        return loss_fil + kappa*loss_stat
+        loss = loss_fil + kappa*loss_stat
+        loss.cluster_filling = loss_fil
+        loss.cluster_distance = loss_stat
+        return loss
 
 
 class LossWasserstein(nn.Module):
