@@ -81,7 +81,6 @@ class DistributionPlotter:
         plt.title(title)
         plt.xlabel('UMAP Dimension 1')
         plt.ylabel('UMAP Dimension 2')
-        plt.show()
 
     def plot_corner(self, *datasets, labels=None, title=None):
         """
@@ -107,8 +106,6 @@ class DistributionPlotter:
         plt.legend(handles, labels, loc='upper right', frameon=False, bbox_to_anchor=(1.0, 2.0))
 
         fig.suptitle(title)
-        plt.show()
-
 
     def plot_tsne_sets(self, X1, X2, labels=["Dataset 1", "Dataset 2"], marker1="X", marker2="+", title=None):
         """ plot tsne for two datasets, using a common transformation"""
