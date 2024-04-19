@@ -23,8 +23,7 @@ class ClusterMetrics:
         self.n_clusters = n_clusters
         prediction, self.cluster_centers = kmeans(X=target, num_clusters=n_clusters, device=target.device)
         distances = pairwise_distance(target, self.cluster_centers)
-        self.filling_target = torch.bincount(prediction)
-        self.filling_target /= self.filling_target.sum()
+        self.filling_target = torch.bincount(prediction) / len(prediction)
 #        self.mean_distances = torch.tensor([torch.mean(distances[prediction == c,c])
 #                                             for c in range(self.n_clusters)])
         self.cluster_distances_target = self.compute_cluster_distances(distances,
@@ -60,8 +59,7 @@ class ClusterMetrics:
     @torch.no_grad()
     def cluster_filling(self, data):
         prediction = self.predict_cluster(data)
-        filling = torch.bincount(prediction)
-        filling /= filling.sum()
+        filling = torch.bincount(prediction) / len(prediction)
         return filling
 
     @torch.no_grad()
