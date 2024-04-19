@@ -28,10 +28,10 @@ class ClusterMetrics:
 #                                             for c in range(self.n_clusters)])
         self.cluster_distances_target = self.compute_cluster_distances(distances,
                                                                        prediction,
-                                                                       torch.ones(n_clusters))
+                                                                       torch.ones(self.n_clusters))
         self.cluster_stddevs_target = self.compute_cluster_standard_deviation(distances,
                                                 prediction,
-                                                torch.ones(n_clusters),
+                                                torch.ones(self.n_clusters),
                                                 self.cluster_distances_target)
 
 
@@ -86,7 +86,7 @@ class ClusterMetrics:
         prediction = self.predict_cluster_from_distances(distances)
         dd = self.compute_cluster_distances(distances,
                                             prediction,
-                                            torch.ones(n_clusters))
+                                            torch.ones(self.n_clusters))
         cluster_distances = dd / self.cluster_distances_target
         cluster_stddevs = self.compute_cluster_standard_deviation(distances,
                                                                   prediction,
