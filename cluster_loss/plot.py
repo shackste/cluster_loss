@@ -52,7 +52,7 @@ class DistributionPlotter:
         if labels and len(embeddings) != len(labels):
             raise ValueError("Number of data sets and labels must match")
 
-        plt.figure(figsize=(10, 8))
+        fig = plt.figure(figsize=(10, 8))
 
         handles = []
         for i, embedding in enumerate(embeddings):
@@ -81,6 +81,7 @@ class DistributionPlotter:
         plt.title(title)
         plt.xlabel('UMAP Dimension 1')
         plt.ylabel('UMAP Dimension 2')
+        return fig
 
     def plot_corner(self, *datasets, labels=None, title=None):
         """
@@ -106,6 +107,7 @@ class DistributionPlotter:
         plt.legend(handles, labels, loc='upper right', frameon=False, bbox_to_anchor=(1.0, 2.0))
 
         fig.suptitle(title)
+        return fig
 
     def plot_tsne_sets(self, X1, X2, labels=["Dataset 1", "Dataset 2"], marker1="X", marker2="+", title=None):
         """ plot tsne for two datasets, using a common transformation"""
@@ -120,11 +122,12 @@ class DistributionPlotter:
         X2_tsne = X_combined_tsne[len(X1):]
 
         # Plot
-        plt.figure(figsize=(10, 8))
+        fig = plt.figure(figsize=(10, 8))
         plt.title(title)
         plt.scatter(X1_tsne[:, 0], X1_tsne[:, 1], label=labels[0], marker=marker1)
         plt.scatter(X2_tsne[:, 0], X2_tsne[:, 1], label=labels[1], marker=marker2)
         plt.legend()
+        return fig
 
 
     def plot_tsne_sets(self, *datasets, labels=None, markers=None, title=None):
@@ -140,7 +143,7 @@ class DistributionPlotter:
         X_combined_tsne = self.tsne.fit_transform(X_combined)
 
         # Plot
-        plt.figure(figsize=(10, 8))
+        fig = plt.figure(figsize=(10, 8))
         plt.title(title)
 
         start_idx = 0
@@ -158,5 +161,6 @@ class DistributionPlotter:
             start_idx = end_idx
 
         plt.legend()
+        return fig
 
 
