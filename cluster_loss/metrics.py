@@ -2,7 +2,7 @@ from functools import partial
 
 import numpy as np
 import torch
-from kmeans_pytorch import pairwise_distance
+from kmeans_pytorch import kmeans, kmeans_predict, pairwise_distance
 from geomloss import SamplesLoss
 from pytorch_fid.fid_score import calculate_frechet_distance
 
@@ -15,6 +15,134 @@ pairwise_distance = partial(pairwise_distance, device=device)
 
 
 wasserstein_distance = SamplesLoss("sinkhorn", p=2, blur=0.05, scaling=0.8, backend="tensorized")
+
+
+class ClusterMetrics:
+    @torch.no_grad()
+    def __init__(self, target: torch.Tensor, n_clusters: int):
+        self.n_clusters = n_clusters
+        prediction, self.cluster_centers = kmeans(X=target, num_clusters=n_clusters, device=target.device)
+        distances = pairwise_distance(target, self.cluster_centers)
+        self.filling_target = torch.bincount(prediction)
+#        self.mean_distances = torch.tensor([torch.mean(distances[prediction == c,c])
+#                                             for c in range(self.n_clusters)])
+        self.cluster_distances_target = self.compute_cluster_distances(distances,
+                                                                       prediction,
+                                                                       torch.ones(n_clusters))
+        self.cluster_stddevs_target = self.compute_cluster_standard_deviation(distances,
+                                                prediction,
+                                                torch.ones(n_clusters),
+                                                self.cluster_distances_target)
+
+
+    def cluster_metrics(self, data):
+        """ Compute the cluster metrics for the given data.
+        The K cluster centers are fitted to the target set used for initialization of the parent ClusterMetrics object.
+
+        Args:
+            data (torch.Tensor): NxD-Tensor containing N datapoints with D dimensions
+
+        Returns:
+            error (torch.Tensor): 1-Tensor containing the cluster error score (Eq. 1)
+            distances (torch.Tensor): K-Tensor containing the cluster distance score for each cluster (Eq. 2)
+            stddev (torch.Tensor): K-Tensor containing the cluster standard deviation score for each cluster (Eq. 3)
+        """
+        error = self.cluster_error(data)
+        distances, stddevs = self.cluster_distances_and_standard_deviations(data)
+        return error, distances, stddevs
+
+    @torch.no_grad()
+    def cluster_error(self, data):
+        filling = self.cluster_filling(data)
+        return cluster_error(filling, self.filling_target)
+
+    @torch.no_grad()
+    def cluster_filling(self, data):
+        prediction = self.predict_cluster(data)
+        filling = torch.bincount(prediction)
+        return filling
+
+    @torch.no_grad()
+    def cluster_distances(self, data):
+        """ compute the cluster distance for each cluster """
+        distances = pairwise_distance(data, self.cluster_centers)
+        prediction = self.predict_cluster_from_distances(distances)
+        return self.compute_cluster_distances(distances,
+                                              prediction,
+                                              self.cluster_distances_target)
+
+    @torch.no_grad()
+    def compute_cluster_distances(self, distances, prediction, target):
+        cluster_distances = []
+        for c in range(self.n_clusters):
+            d = distances[prediction==c, c]
+            cd = cluster_distance(d, target[c])
+            cluster_distances.append(cd)
+        return torch.tensor(cluster_distances)
+
+    def cluster_distances_and_standard_deviations(self, data):
+        """ compute the cluster standard deviation for each cluster """
+        distances = pairwise_distance(data, self.cluster_centers)
+        prediction = self.predict_cluster_from_distances(distances)
+        dd = self.compute_cluster_distances(distances,
+                                            prediction,
+                                            torch.ones(n_clusters))
+        cluster_distances = dd / self.cluster_distances_target
+        cluster_stddevs = self.compute_cluster_standard_deviation(distances,
+                                                                  prediction,
+                                                                  self.cluster_stddevs_target,
+                                                                  dd)
+        return cluster_distances, cluster_stddevs
+
+
+    @torch.no_grad()
+    def compute_cluster_standard_deviation(self, distances, prediction, target, dd):
+        cluster_stddevs = []
+        for c in range(self.n_clusters):
+            d = distances[prediction==c, c]
+            csd = cluster_standard_deviation(d, target[c], dd[c])
+            cluster_stddevs.append(csd)
+        return torch.tensor(cluster_stddevs)
+
+
+
+
+    @torch.no_grad()
+    def predict_cluster(self, data):
+        return kmeans_predict(data, self.cluster_centers)
+
+    @torch.no_grad()
+    def predict_cluster_from_distances(self, distances):
+        return torch.argmin(distances, dim=1)
+
+def cluster_distance(d, d_target):
+    """
+    Computes the cluster distance (Hackstein et al. 2023, Eq. 2)
+
+    Args:
+        d (torch.Tensor): distances to neighbouring cluster center
+        d_target (float): computed cluster distance for target set
+
+    Returns:
+        torch.Tensor: the computed cluster distance value
+    """
+    return torch.sqrt(torch.mean(d*d)) / d_target
+
+def cluster_standard_deviation(d, sigma_target, dd):
+    """
+    Computes the cluster standard deviation (Hackstein et al. 2023, Eq. 3)
+
+    Args:
+        d (torch.Tensor): distances to neighbouring cluster center
+        sigma_target (float): computed cluster standard deviation for target set
+        dd (float): non-renormalized cluster distance (d*D)
+
+    Returns:
+        torch.Tensor: the computed cluster standard deviation value
+    """
+    d = d - dd
+
+    return torch.sqrt(torch.mean(d*d)) / sigma_target
 
 def cluster_error(n: torch.Tensor, n_target: torch.Tensor):
     """
