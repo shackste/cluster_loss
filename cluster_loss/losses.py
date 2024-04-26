@@ -64,9 +64,10 @@ class LossKMeans(nn.Module):
     Args:
         target (torch.Tensor): The target data.
         n_clusters (int): The number of clusters to use.
+        beta (float): distance weighting exponent for cluster filling approximation
     """
 
-    def __init__(self, target: torch.Tensor, n_clusters: int):
+    def __init__(self, target: torch.Tensor, n_clusters: int, beta: float = 2.):
         super(LossKMeans, self).__init__()
         with torch.no_grad():
             prediction, cluster_centers = kmeans(X=target, num_clusters=n_clusters, device=target.device)
@@ -74,7 +75,8 @@ class LossKMeans(nn.Module):
             distances = pairwise_distance(target, cluster_centers)
             means, covs = cluster_statistics(target, prediction.to(target.device), cluster_centers.to(target.device))
         self.cluster_centers = cluster_centers.detach()
-        self.filling_target = approx_cluster_filling(distances).detach()
+        self.beta = beta
+        self.filling_target = approx_cluster_filling(distances, beta=self.beta).detach()
         self.means_target = means.detach()
         self.covs_target = covs.detach()
         self.prediction = prediction.detach()
