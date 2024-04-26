@@ -216,7 +216,7 @@ def compute_cluster_filling_mse(input: torch.Tensor, cluster_centers: torch.Tens
     loss_fil = cluster_error(filling, filling_target)
     return loss_fil
 
-def approx_cluster_filling(distances):
+def approx_cluster_filling(distances, beta=None):
     """ computes an approximation for the number of datapoints within each cluster.
     This is done by applying the formula
 
@@ -229,6 +229,7 @@ def approx_cluster_filling(distances):
 
     Args:
     distances (torch.Tensor): The tensor containing the pairwise distances between data points and cluster centers.
+    beta : dummy kwarg to match with other definitions
 
     Returns:
     torch.Tensor: The computed filling tensor.
@@ -237,6 +238,30 @@ def approx_cluster_filling(distances):
     exp_d = torch.exp(-distances) + 1e-16  # add small epsilon to omit nans
     exp_d = exp_d / exp_d.sum(dim=1, keepdims=True)  ## -> range 0-1
     filling = exp_d.sum(dim=0)
+    filling = filling / filling.sum()  # renormalize by total to obtain relative filling
+    return filling
+
+def approx_cluster_filling(distances, beta=2):
+    """
+    Computes an approximation for the number of datapoints within each cluster.
+    This is done by applying the formula: 
+    \( c_{ik} = \frac{d_{ik}^{-\beta}}{\sum_{j=1}^K d_{ij}^{-\beta}} \)
+
+    Args:
+    distances (torch.Tensor): The NxK tensor containing the pairwise distances between data points and cluster centers.
+    beta (float): The power parameter influencing how quickly influence decays with distance.
+
+    Returns:
+    torch.Tensor: The computed filling K-tensor.
+    """
+    # Ensure distances are positive and non-zero
+    distances = torch.clamp(distances, min=1e-16)
+    # Calculate weights using inverse distance powered by -beta
+    weights = torch.pow(distances, -beta)
+    # Normalize weights across the clusters
+    normalized_weights = weights / weights.sum(dim=1, keepdim=True)
+    # Sum weights for each cluster to approximate the number of points in each cluster
+    filling = normalized_weights.sum(dim=0)
     filling = filling / filling.sum()  # renormalize by total to obtain relative filling
     return filling
 
