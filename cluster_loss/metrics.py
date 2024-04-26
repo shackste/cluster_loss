@@ -216,7 +216,7 @@ def compute_cluster_filling_mse(input: torch.Tensor, cluster_centers: torch.Tens
     loss_fil = cluster_error(filling, filling_target)
     return loss_fil
 
-def approx_cluster_filling_exp(distances):
+def approx_cluster_filling(distances, beta=None):
     """ computes an approximation for the number of datapoints within each cluster.
     This is done by applying the formula
 
@@ -240,7 +240,7 @@ def approx_cluster_filling_exp(distances):
     filling = filling / filling.sum()  # renormalize by total to obtain relative filling
     return filling
 
-def approx_cluster_filling(distances, beta=2):
+def approx_cluster_filling_new(distances, beta=2):
     """
     Computes an approximation for the number of datapoints within each cluster.
     This is done by applying the formula: 
