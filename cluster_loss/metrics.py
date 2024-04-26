@@ -195,7 +195,7 @@ def torch_cov(x, rowvar=False, bias=False, ddof=None, aweights=None):
     return cov
 
 
-def compute_cluster_filling_mse(input: torch.Tensor, cluster_centers: torch.Tensor, filling_target: torch.Tensor, print_filling: bool = False) -> torch.Tensor:
+def compute_cluster_filling_mse(input: torch.Tensor, cluster_centers: torch.Tensor, filling_target: torch.Tensor, print_filling: bool = False, beta: float = 2.) -> torch.Tensor:
     """Computes the loss based on the cluster filling.
     Args:
     input (torch.Tensor): The input data tensor.
@@ -208,7 +208,7 @@ def compute_cluster_filling_mse(input: torch.Tensor, cluster_centers: torch.Tens
     """
     distances = pairwise_distance(input, cluster_centers)
     #   distances = distances / self.mean_distances.repeat(input.shape[0], 1)  # Todo: normalize by mean distance?
-    filling = approx_cluster_filling(distances)
+    filling = approx_cluster_filling(distances, beta=beta)
     if print_filling:
         print("filling")
         print("target", filling_target)
