@@ -217,6 +217,12 @@ def compute_cluster_filling_mse(input: torch.Tensor, cluster_centers: torch.Tens
     return loss_fil
 
 def approx_cluster_filling(distances, beta=None):
+    print("beta", beta)
+    if beta:
+        return approx_cluster_filling_lin(distances, beta=beta)
+    return approx_cluster_filling_exp(distances)
+
+def approx_cluster_filling_exp(distances):
     """ computes an approximation for the number of datapoints within each cluster.
     This is done by applying the formula
 
@@ -240,7 +246,7 @@ def approx_cluster_filling(distances, beta=None):
     filling = filling / filling.sum()  # renormalize by total to obtain relative filling
     return filling
 
-def approx_cluster_filling_new(distances, beta=2):
+def approx_cluster_filling_lin(distances, beta=2.):
     """
     Computes an approximation for the number of datapoints within each cluster.
     This is done by applying the formula: 
@@ -253,8 +259,6 @@ def approx_cluster_filling_new(distances, beta=2):
     Returns:
     torch.Tensor: The computed filling K-tensor.
     """
-    if not beta: ### !!! For Testing: if beta=0, return to old implementation
-        return approx_cluster_filling_exp(distances)
     # Ensure distances are positive and non-zero
     distances = torch.clamp(distances, min=1e-16)
     # Calculate weights using inverse distance powered by -beta
