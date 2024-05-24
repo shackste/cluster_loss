@@ -7,5 +7,5 @@ setup(
     author='Stefan Hackstein',
     author_email='shackst3@gmail.com',
     packages=['cluster_loss'],
-    install_requires=['kmeans_pytorch', 'torch', 'numpy', 'geomloss', 'pytorch_fid', 'corner', 'umap-learn']
+    install_requires=['kmeans_pytorch', 'torch', 'numpy', 'geomloss', 'pytorch_fid', 'corner', 'umap-learn', 'corner']
 )
