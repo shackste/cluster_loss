@@ -1,6 +1,7 @@
 from functools import partial
 
-from kmeans_pytorch import kmeans, kmeans_predict, pairwise_distance
+from kmeans_pytorch import kmeans, kmeans_predict, pairwise_cosine
+from kmeans_pytorch import pairwise_distance as pairwise_distance_orig
 import torch
 import torch.nn as nn
 from geomloss import SamplesLoss
@@ -20,9 +21,28 @@ MSE = nn.MSELoss()
 # kmeans_predict = partial(kmeans_predict, distance="cosine")
 # pairwise_distance = partial(pairwise_cosine)
 
-kmeans = partial(kmeans, device=device)
-kmeans_predict = partial(kmeans_predict, device=device)
-pairwise_distance = partial(pairwise_distance, device=device)
+kmeans_orig = partial(kmeans, device=device)
+kmeans_predict_orig = partial(kmeans_predict, device=device)
+pairwise_distance_orig = partial(pairwise_distance_orig, device=device)
+kmeans, kmeans_predict, pairwise_distance = kmeans_orig, kmeans_predict_orig, pairwise_distance_orig
+
+# Globale Parameter
+use_euclid_distance = False
+use_cosine_distance = False
+
+max_dim_euclid = 5
+
+def set_distance_metrics(dimensionality, threshold=max_dim_euclid):
+    global kmeans, kmeans_predict, pairwise_distance, pairwise_distance_orig
+    
+    if use_euclid_distance or (dimensionality < threshold and not use_cosine_distance):
+        kmeans = kmeans_orig
+        kmeans_predict = kmeans_predict_orig
+        pairwise_distance = pairwise_distance_orig
+    else:
+        kmeans = partial(kmeans_orig, distance="cosine")
+        kmeans_predict = partial(kmeans_predict_orig, distance="cosine")
+        pairwise_distance = pairwise_cosine
 
 
 class LossWassersteinFull(nn.Module):
@@ -69,6 +89,7 @@ class LossKMeans(nn.Module):
 
     def __init__(self, target: torch.Tensor, n_clusters: int, beta: float = 0.):
         super(LossKMeans, self).__init__()
+        set_distance_metrics(target.shape[1]
         with torch.no_grad():
             prediction, cluster_centers = kmeans(X=target, num_clusters=n_clusters, device=target.device)
             prediction = kmeans_predict(target, cluster_centers)
