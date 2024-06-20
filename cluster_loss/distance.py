@@ -41,10 +41,12 @@ class DistanceMetric:
           you can set either use_euclid_distance or use_cosine_distance to True, to force this mode. If both are True, Euclid is used.
       """      
       if use_euclid_distance or (dimensionality <= threshold and not use_cosine_distance):
+          print(f"Dimensionality: {dimensionality}<={threshold} -> use Euclid distance")
           cls.kmeans = kmeans_orig
           cls.kmeans_predict = kmeans_predict_orig
           cls.pairwise_distance = pairwise_distance_orig
       else:
+          print(f"Dimensionality: {dimensionality}>{threshold} -> use Cosine distance")
           cls.kmeans = partial(kmeans_orig, distance="cosine")
           cls.kmeans_predict = partial(kmeans_predict_orig, distance="cosine")
           cls.pairwise_distance = pairwise_cosine_orig
