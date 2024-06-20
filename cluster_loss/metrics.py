@@ -6,6 +6,8 @@ from kmeans_pytorch import kmeans, kmeans_predict, pairwise_distance
 from geomloss import SamplesLoss
 from pytorch_fid.fid_score import calculate_frechet_distance
 
+from distance import DistanceMetric
+
 kmeans = DistanceMetric.kmeans
 kmeans_predict = DistanceMetric.kmeans_predict
 pairwise_distance = DistanceMetric.pairwise_distance
