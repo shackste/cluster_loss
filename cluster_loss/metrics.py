@@ -6,15 +6,10 @@ from kmeans_pytorch import kmeans, kmeans_predict, pairwise_distance
 from geomloss import SamplesLoss
 from pytorch_fid.fid_score import calculate_frechet_distance
 
-# Set device
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-wasserstein_distance = SamplesLoss("sinkhorn", p=2, blur=0.05, scaling=0.8, backend="tensorized")
-
 kmeans = DistanceMetric.kmeans
 kmeans_predict = DistanceMetric.kmeans_predict
 pairwise_distance = DistanceMetric.pairwise_distance
-
+wasserstein_distance = DistanceMetric.wasserstein_distance
 
 
 class ClusterMetrics:
