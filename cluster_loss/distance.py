@@ -24,6 +24,9 @@ class DistanceMetric:
   kmeans_predict = kmeans_predict_orig
   pairwise_distance = pairwise_distance_orig
 
+  wasserstein_distance = SamplesLoss("sinkhorn", p=2, blur=0.05, scaling=0.8, backend="tensorized")
+
+  
   @classmethod
   def set_distance_metrics(cls, dimensionality, threshold=max_dim_euclid):
       """ sets all internal distance metrics to Euclidean distance (low dimension) or cosine similarity (high dimension), depending on dimensionality 
