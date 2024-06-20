@@ -1,59 +1,22 @@
 from functools import partial
 
-from kmeans_pytorch import kmeans, kmeans_predict, pairwise_cosine
-from kmeans_pytorch import pairwise_distance as pairwise_distance_orig
 import torch
 import torch.nn as nn
 from geomloss import SamplesLoss
 
 from cluster_loss.metrics import compute_cluster_filling_mse, approx_cluster_filling, cluster_statistics, calculate_fid
+from distance import DistanceMetric
 
 # Set device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 wasserstein_distance = SamplesLoss("sinkhorn", p=2, blur=0.05, scaling=0.8, backend="tensorized")
-
 MSE = nn.MSELoss()
 
-# TODO: USE COSINE DISTANCE IN HIGH DIMENSIONS
+kmeans = DistanceMetric.kmeans
+kmeans_predict = DistanceMetric.kmeans_predict
+pairwise_distance = DistanceMetric.pairwise_distance
 
-# kmeans = partial(kmeans, distance="cosine")
-# kmeans_predict = partial(kmeans_predict, distance="cosine")
-# pairwise_distance = partial(pairwise_cosine)
-
-kmeans_orig = partial(kmeans, device=device)
-kmeans_predict_orig = partial(kmeans_predict, device=device)
-pairwise_distance_orig = partial(pairwise_distance_orig, device=device)
-kmeans, kmeans_predict, pairwise_distance = kmeans_orig, kmeans_predict_orig, pairwise_distance_orig
-
-# Globale Parameter
-use_euclid_distance = False
-use_cosine_distance = False
-
-max_dim_euclid = 5
-
-def set_distance_metrics(dimensionality, threshold=max_dim_euclid):
-    """ sets all internal distance metrics to Euclidean distance (low dimension) or cosine similarity (high dimension), depending on dimensionality 
-
-    Args:
-        dimensionality (int): number of dimensions in the considered space
-
-    Kwargs:
-        threshold (int): if dimensionality is lower than threshold, use euclid, else, use cosine. Default: 5 (set in max_dim_euclid)
-
-    Note:
-        you can set either use_euclid_distance or use_cosine_distance to True, to force this mode. If both are True, Euclid is used.
-    """
-    global kmeans, kmeans_predict, pairwise_distance, pairwise_distance_orig
-    
-    if use_euclid_distance or (dimensionality < threshold and not use_cosine_distance):
-        kmeans = kmeans_orig
-        kmeans_predict = kmeans_predict_orig
-        pairwise_distance = pairwise_distance_orig
-    else:
-        kmeans = partial(kmeans_orig, distance="cosine")
-        kmeans_predict = partial(kmeans_predict_orig, distance="cosine")
-        pairwise_distance = pairwise_cosine
 
 
 class LossWassersteinFull(nn.Module):
@@ -100,7 +63,7 @@ class LossKMeans(nn.Module):
 
     def __init__(self, target: torch.Tensor, n_clusters: int, beta: float = 0.):
         super(LossKMeans, self).__init__()
-        set_distance_metrics(target.shape[1]
+        DistanceMetric.set_distance_metrics(target.shape[1])
         with torch.no_grad():
             prediction, cluster_centers = kmeans(X=target, num_clusters=n_clusters, device=target.device)
             prediction = kmeans_predict(target, cluster_centers)
