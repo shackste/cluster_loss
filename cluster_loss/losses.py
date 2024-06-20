@@ -5,7 +5,7 @@ import torch.nn as nn
 from geomloss import SamplesLoss
 
 from cluster_loss.metrics import compute_cluster_filling_mse, approx_cluster_filling, cluster_statistics, calculate_fid
-from distance import DistanceMetric
+from cluster_loss.distance import DistanceMetric
 
 MSE = nn.MSELoss()
 
