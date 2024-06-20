@@ -33,6 +33,17 @@ use_cosine_distance = False
 max_dim_euclid = 5
 
 def set_distance_metrics(dimensionality, threshold=max_dim_euclid):
+    """ sets all internal distance metrics to Euclidean distance (low dimension) or cosine similarity (high dimension), depending on dimensionality 
+
+    Args:
+        dimensionality (int): number of dimensions in the considered space
+
+    Kwargs:
+        threshold (int): if dimensionality is lower than threshold, use euclid, else, use cosine. Default: 5 (set in max_dim_euclid)
+
+    Note:
+        you can set either use_euclid_distance or use_cosine_distance to True, to force this mode. If both are True, Euclid is used.
+    """
     global kmeans, kmeans_predict, pairwise_distance, pairwise_distance_orig
     
     if use_euclid_distance or (dimensionality < threshold and not use_cosine_distance):
