@@ -9,17 +9,18 @@ from pytorch_fid.fid_score import calculate_frechet_distance
 # Set device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# TODO: USE COSINE DISTANCE IN HIGH DIMENSIONS
-# pairwise_distance = partial(pairwise_cosine)
-pairwise_distance = partial(pairwise_distance, device=device)
-
-
 wasserstein_distance = SamplesLoss("sinkhorn", p=2, blur=0.05, scaling=0.8, backend="tensorized")
+
+kmeans = DistanceMetric.kmeans
+kmeans_predict = DistanceMetric.kmeans_predict
+pairwise_distance = DistanceMetric.pairwise_distance
+
 
 
 class ClusterMetrics:
     @torch.no_grad()
     def __init__(self, target: torch.Tensor, n_clusters: int):
+        DistanceMetric.set_distance_metrics(target.shape[1])
         self.n_clusters = n_clusters
         prediction, self.cluster_centers = kmeans(X=target, num_clusters=n_clusters, device=target.device)
         distances = pairwise_distance(target, self.cluster_centers)
