@@ -24,7 +24,7 @@ class DistanceMetric:
   use_cosine_distance = False ## force use of cosine distance
   max_dim_euclid = 5          ## threshold to change to cosine distance
 
-  
+  mode = "Euclid"
   kmeans = kmeans_orig
   kmeans_predict = kmeans_predict_orig
   pairwise_distance = pairwise_distance_orig
@@ -47,11 +47,13 @@ class DistanceMetric:
       """      
       if cls.use_euclid_distance or (dimensionality <= threshold and not cls.use_cosine_distance):
           print(f"Dimensionality: {dimensionality}<={threshold} -> use Euclid distance")
+          mode = "Euclid"
           cls.kmeans = kmeans_orig
           cls.kmeans_predict = kmeans_predict_orig
           cls.pairwise_distance = pairwise_distance_orig
       else:
           print(f"Dimensionality: {dimensionality}>{threshold} -> use Cosine distance")
+          mode = "Cosine"
           cls.kmeans = partial(kmeans_orig, distance="cosine")
           cls.kmeans_predict = partial(kmeans_predict_orig, distance="cosine")
           cls.pairwise_distance = pairwise_cosine_orig
