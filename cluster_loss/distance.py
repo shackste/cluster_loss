@@ -3,6 +3,7 @@
 from functools import partial
 
 import torch
+import torch.nn.functional as F
 from geomloss import SamplesLoss
 
 from kmeans_pytorch import kmeans, kmeans_predict, pairwise_cosine
@@ -48,12 +49,17 @@ class DistanceMetric:
       if cls.use_euclid_distance or (dimensionality <= threshold and not cls.use_cosine_distance):
           print(f"Dimensionality: {dimensionality}<={threshold} -> use Euclid distance")
           mode = "Euclid"
-#          cls.kmeans = kmeans_orig
-#          cls.kmeans_predict = kmeans_predict_orig
-#          cls.pairwise_distance = pairwise_distance_orig
+          cls.kmeans = kmeans_orig
+          cls.kmeans_predict = kmeans_predict_orig
+          cls.pairwise_distance = pairwise_distance_orig
       else:
           print(f"Dimensionality: {dimensionality}>{threshold} -> use Cosine distance")
           mode = "Cosine"
+          # fastest way to compute cosine distance is to compute euclid distance on normalized vectors
+          cls.kmeans = lambda *args, X=None, **kwargs: kmeans_orig(*args, X=F.normalize(X, dim=1), **kwargs)
+          cls.kmeans_predict = lambda a, b: kmeans_predict_orig(F.normalize(a), F.normalize(b))
+          cls.pairwise_distance = lambda a, b: pairwise_distance_orig(F.normalize(a), F.normalize(b))
+          ### this computation uses the same trick, but normalization is done repeatedly
 #          cls.kmeans = partial(kmeans_orig, distance="cosine")
 #          cls.kmeans_predict = partial(kmeans_predict_orig, distance="cosine")
 #          cls.pairwise_distance = pairwise_cosine_orig
