@@ -2,8 +2,12 @@
 ## this ensures consistency in the use of different distance metrics
 from functools import partial
 
+import torch
+
 from kmeans_pytorch import kmeans, kmeans_predict, pairwise_cosine
 from kmeans_pytorch import pairwise_distance as pairwise_distance_orig
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 kmeans_orig = partial(kmeans, device=device)
 kmeans_predict_orig = partial(kmeans_predict, device=device)
