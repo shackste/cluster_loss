@@ -3,6 +3,7 @@
 from functools import partial
 
 import torch
+from geomloss import SamplesLoss
 
 from kmeans_pytorch import kmeans, kmeans_predict, pairwise_cosine
 from kmeans_pytorch import pairwise_distance as pairwise_distance_orig
