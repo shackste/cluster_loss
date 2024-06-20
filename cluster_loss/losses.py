@@ -7,15 +7,12 @@ from geomloss import SamplesLoss
 from cluster_loss.metrics import compute_cluster_filling_mse, approx_cluster_filling, cluster_statistics, calculate_fid
 from distance import DistanceMetric
 
-# Set device
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-wasserstein_distance = SamplesLoss("sinkhorn", p=2, blur=0.05, scaling=0.8, backend="tensorized")
 MSE = nn.MSELoss()
 
 kmeans = DistanceMetric.kmeans
 kmeans_predict = DistanceMetric.kmeans_predict
 pairwise_distance = DistanceMetric.pairwise_distance
+wasserstein_distance = DistanceMetric.wasserstein_distance
 
 
 
@@ -123,7 +120,7 @@ class LossWasserstein(nn.Module):
         # get cluster association
         prediction = kmeans_predict(x, self.cluster_centers.to(x.device)).detach()
         # for each cluster, compute wasserstein distance
-        loss_med = torch.tensor(0.).to(device)
+        loss_med = torch.tensor(0.).to(x.device)
         for cluster in torch.unique(prediction):
             in_cluster = prediction == cluster
             if not in_cluster.any():
@@ -138,7 +135,7 @@ class LossWasserstein(nn.Module):
             target_resized = self.target[self.prediction == cluster][:min_size]
 
             # Compute the Wasserstein distance with same-sized arrays
-            loss_med += wasserstein_distance(x_resized.to(device), target_resized.to(device))
+            loss_med += wasserstein_distance(x_resized.to(x.device), target_resized.to(x.device))
 
         return loss_fil + loss_med
 
