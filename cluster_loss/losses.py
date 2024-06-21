@@ -40,10 +40,10 @@ class LossWassersteinFull(nn.Module):
         size_x = len(x)
         size_target = len(self.target)
 
-        # Find the minimum size and resize both arrays accordingly
+        # Find the minimum size and resize both arrays accordingly, including random permutation 
         min_size = min(size_x, size_target)
-        x_resized = x[:min_size]
-        target_resized = self.target[:min_size]
+        x_resized = x[torch.randperm(len(x))][:min_size]
+        target_resized = self.target[torch.randperm(len(self.target))][:min_size]
 
         # Compute the Wasserstein distance with same-sized arrays
         return wasserstein_distance(x_resized, target_resized)
