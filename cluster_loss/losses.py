@@ -23,11 +23,11 @@ class LossWassersteinFull(nn.Module):
         target (torch.Tensor): The target data.
     """
 
-    def __init__(self, target: torch.Tensor, *x):
+    def __init__(self, target: torch.Tensor, *args, **kwargs):
         super(LossWassersteinFull, self).__init__()
         self.target = target.detach()
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         """Computes the loss for the given input tensor.
 
         Args:
@@ -58,7 +58,7 @@ class LossKMeans(nn.Module):
         beta (float): distance weighting exponent for cluster filling approximation
     """
 
-    def __init__(self, target: torch.Tensor, n_clusters: int, beta: float = 0.):
+    def __init__(self, target: torch.Tensor, n_clusters: int, *args, beta: float = 0., **kwargs):
         super(LossKMeans, self).__init__()
         DistanceMetric.set_distance_metrics(target.shape[1])
         with torch.no_grad():
@@ -78,10 +78,10 @@ class LossKMeans(nn.Module):
 class LossMeanCov(nn.Module):
     """Computes loss based on cluster statistics for a given set."""
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-    def forward(self, x: torch.Tensor, kappa=1.) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, *args, kappa=1., **kwargs) -> torch.Tensor:
         """Computes the loss for the given input tensor.
 
         Args:
@@ -104,10 +104,10 @@ class LossMeanCov(nn.Module):
 class LossWasserstein(nn.Module):
     """Computes combined Wasserstein loss in clusters."""
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         """Computes the loss for the given input tensor.
 
         Args:
@@ -141,11 +141,12 @@ class LossWasserstein(nn.Module):
 
 
 class LossFID(nn.Module):
-    def __init__(self):
-        super(LossFID, self).__init__()
+    def __init__(self, target, *args, **kwargs):
+        super(LossFID, self).__init__(*args, **kwargs)
+        self.target = target
 
-    def forward(self, real_features, generated_features):
-        fid = calculate_fid(real_features, generated_features)
+    def forward(self, prediction, *args, **kwargs):
+        fid = calculate_fid(self.target, prediction)
         return fid
 
 
