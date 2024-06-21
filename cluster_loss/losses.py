@@ -79,7 +79,7 @@ class LossMeanCov(nn.Module):
     """Computes loss based on cluster statistics for a given set."""
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__()
 
     def forward(self, x: torch.Tensor, *args, kappa=1., **kwargs) -> torch.Tensor:
         """Computes the loss for the given input tensor.
@@ -105,7 +105,7 @@ class LossWasserstein(nn.Module):
     """Computes combined Wasserstein loss in clusters."""
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__()
 
     def forward(self, x: torch.Tensor, *args, **kwargs) -> torch.Tensor:
         """Computes the loss for the given input tensor.
@@ -142,7 +142,7 @@ class LossWasserstein(nn.Module):
 
 class LossFID(nn.Module):
     def __init__(self, target, *args, **kwargs):
-        super(LossFID, self).__init__(*args, **kwargs)
+        super(LossFID, self).__init__()
         self.target = target
 
     def forward(self, prediction, *args, **kwargs):
