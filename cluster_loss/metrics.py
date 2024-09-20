@@ -57,7 +57,7 @@ class ClusterMetrics:
     @torch.no_grad()
     def cluster_filling(self, data):
         prediction = self.predict_cluster(data)
-        filling = torch.bincount(prediction) / len(prediction)
+        filling = torch.bincount(prediction, minlength=self.n_clusters) / len(prediction) ## minlength ensures to count empty clusters
         return filling
 
     @torch.no_grad()
@@ -74,7 +74,8 @@ class ClusterMetrics:
         cluster_distances = []
         for c in range(self.n_clusters):
             d = distances[prediction==c, c]
-            cd = cluster_distance(d, target[c])
+            # If no points are assigned to this cluster, assign neutral distance
+            cd = torch.tensor(1.0, device=distances.device) if d.numel() == 0 else cluster_distance(d, target[c])
             cluster_distances.append(cd)
         return torch.tensor(cluster_distances)
 
@@ -98,7 +99,8 @@ class ClusterMetrics:
         cluster_stddevs = []
         for c in range(self.n_clusters):
             d = distances[prediction==c, c]
-            csd = cluster_standard_deviation(d, target[c], dd[c])
+            # If no points are assigned to this cluster, assign neutral stddev
+            csd = torch.tensor(1.0, device=distances.device) if d.numel() == 0 else cluster_standard_deviation(d, target[c], dd[c])
             cluster_stddevs.append(csd)
         return torch.tensor(cluster_stddevs)
 
